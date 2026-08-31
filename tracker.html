@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Execution Grid - Target IIT Bombay</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --accent: #38bdf8;
+            --text: #f8fafc;
+            --border: #334155;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --target-color: #ec4899;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 24px;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--accent);
+            margin-bottom: 24px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            background: var(--card-bg);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.4);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            min-width: 1350px;
+        }
+
+        th, td {
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+            vertical-align: top;
+        }
+
+        th {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--accent);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .date-cell {
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .victory-cell {
+            text-align: center;
+            background-color: rgba(34, 197, 94, 0.05);
+        }
+
+        .task-complete-cell {
+            text-align: center;
+            background-color: rgba(245, 158, 11, 0.05);
+        }
+
+        .target-cell {
+            text-align: center;
+            background-color: rgba(236, 72, 153, 0.05);
+            font-weight: bold;
+            color: var(--target-color);
+            vertical-align: middle;
+        }
+
+        .target-cell-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .victory-cell input, .task-complete-cell input, .target-cell input {
+            accent-color: var(--target-color);
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .victory-cell input, .task-complete-cell input {
+            accent-color: var(--success);
+        }
+
+        .slot-cell {
+            text-align: center;
+        }
+
+        .slot-cell input {
+            accent-color: var(--accent);
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .rest-cell {
+            background-color: rgba(0, 0, 0, 0.2);
+            color: #64748b;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+
+        textarea {
+            width: 100%;
+            height: 100px;
+            background-color: rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            padding: 8px;
+            box-sizing: border-box;
+            resize: vertical;
+            font-family: inherit;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        textarea:focus {
+            outline: 1px solid var(--accent);
+        }
+
+        .tracker-summary {
+            margin-top: 24px;
+            padding: 20px;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .stat-card {
+            text-align: center;
+        }
+
+        .stat-card .val {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        .stat-card .lbl {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Execution Tracker Grid (Target: Feb 5)</h1>
+
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>1st Victory<br><small>(4 AM Wakeup)</small></th>
+                <th>Slot 1<br><small>04:00 - 07:00</small></th>
+                <th>Ex & Bath<br><small>07:00 - 08:00</small></th>
+                <th>Slot 2<br><small>08:00 - 11:00</small></th>
+                <th>Slot 3<br><small>12:00 - 15:00</small></th>
+                <th>Sleep<br><small>15:00 - 16:00</small></th>
+                <th>Slot 4<br><small>16:00 - 19:00</small></th>
+                <th>Slot 5<br><small>20:00 - 23:00</small></th>
+                <th>Numbered Daily Notes / Log</th>
+                <th>All Tasks<br>Done?</th>
+                <th style="color: var(--target-color);">I WILL ACHIEVE IIT BOMBAY</th>
+            </tr>
+        </thead>
+        <tbody id="grid-body"></tbody>
+    </table>
+</div>
+
+<div class="tracker-summary">
+    <div class="stat-card">
+        <div class="val" id="total-study-hours">0 hrs</div>
+        <div class="lbl">Total Study Hours Tracked</div>
+    </div>
+    <div class="stat-card">
+        <div class="val" id="victories-count">0</div>
+        <div class="lbl">4 AM Wake-up Victories</div>
+    </div>
+    <div class="stat-card">
+        <div class="val" id="full-days-count">0</div>
+        <div class="lbl">Days Fully Completed</div>
+    </div>
+    <div class="stat-card">
+        <div class="val" id="iit-mindset-count">0</div>
+        <div class="lbl">IIT Bombay Commitments Ticked</div>
+    </div>
+</div>
+
+<script>
+    function generateDates() {
+        const dates = [];
+        let currentDate = new Date();
+        currentDate.setDate(currentDate.getDate() + 1); // Start from tomorrow
+
+        while (true) {
+            dates.push(new Date(currentDate));
+            if (currentDate.getMonth() === 1 && currentDate.getDate() === 5) { // Feb 5th
+                break;
+            }
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
+        return dates;
+    }
+
+    function autoFormatNumberedList(textarea) {
+        if (textarea.value.trim() === '') {
+            textarea.value = '1. ';
+        }
+    }
+
+    function handleEnterKey(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            const textarea = event.target;
+            const cursorPos = textarea.selectionStart;
+            const textBefore = textarea.value.substring(0, cursorPos);
+            const textAfter = textarea.value.substring(cursorPos);
+            
+            const lines = textBefore.split('\n');
+            const nextNumber = lines.length + 1;
+            
+            textarea.value = textBefore + '\n' + nextNumber + '. ' + textAfter;
+            textarea.selectionStart = textarea.selectionEnd = cursorPos + 4;
+        }
+    }
+
+    function updateSummaryStats() {
+        let totalStudySlots = 0;
+        let totalVictories = 0;
+        let totalFullDays = 0;
+        let totalIITCommitments = 0;
+
+        const allCheckboxes = document.querySelectorAll('input[type="checkbox"]');
+        allCheckboxes.forEach(cb => {
+            if (cb.checked) {
+                if (cb.dataset.field.startsWith('slot')) totalStudySlots++;
+                if (cb.dataset.field === 'victory') totalVictories++;
+                if (cb.dataset.field === 'taskComplete') totalFullDays++;
+                if (cb.dataset.field === 'iitBombay') totalIITCommitments++;
+            }
+        });
+
+        document.getElementById('total-study-hours').textContent = `${totalStudySlots * 3} hrs`;
+        document.getElementById('victories-count').textContent = totalVictories;
+        document.getElementById('full-days-count').textContent = totalFullDays;
+        document.getElementById('iit-mindset-count').textContent = totalIITCommitments;
+    }
+
+    function renderGrid() {
+        const tbody = document.getElementById('grid-body');
+        const dates = generateDates();
+
+        dates.forEach((date) => {
+            const dateStr = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+            const storageKey = `grid_${date.toISOString().split('T')[0]}`;
+            const savedData = JSON.parse(localStorage.getItem(storageKey)) || {};
+
+            const tr = document.createElement('tr');
+
+            tr.innerHTML = `
+                <td class="date-cell">${dateStr}</td>
+                <td class="victory-cell">
+                    <input type="checkbox" data-key="${storageKey}" data-field="victory" ${savedData.victory ? 'checked' : ''}>
+                </td>
+                <td class="slot-cell">
+                    <input type="checkbox" data-key="${storageKey}" data-field="slot1" ${savedData.slot1 ? 'checked' : ''}>
+                </td>
+                <td class="rest-cell">Routine</td>
+                <td class="slot-cell">
+                    <input type="checkbox" data-key="${storageKey}" data-field="slot2" ${savedData.slot2 ? 'checked' : ''}>
+                </td>
+                <td class="slot-cell">
+                    <input type="checkbox" data-key="${storageKey}" data-field="slot3" ${savedData.slot3 ? 'checked' : ''}>
+                </td>
+                <td class="rest-cell">Rest</td>
+                <td class="slot-cell">
+                    <input type="checkbox" data-key="${storageKey}" data-field="slot4" ${savedData.slot4 ? 'checked' : ''}>
+                </td>
+                <td class="slot-cell">
+                    <input type="checkbox" data-key="${storageKey}" data-field="slot5" ${savedData.slot5 ? 'checked' : ''}>
+                </td>
+                <td>
+                    <textarea data-key="${storageKey}" data-field="notes" placeholder="Press Enter to add next numbered point...">${savedData.notes || ''}</textarea>
+                </td>
+                <td class="task-complete-cell">
+                    <input type="checkbox" data-key="${storageKey}" data-field="taskComplete" ${savedData.taskComplete ? 'checked' : ''}>
+                </td>
+                <td class="target-cell">
+                    <div class="target-cell-content">
+                        <span>🎯 IIT BOMBAY</span>
+                        <input type="checkbox" data-key="${storageKey}" data-field="iitBombay" ${savedData.iitBombay ? 'checked' : ''}>
+                    </div>
+                </td>
+            `;
+
+            tbody.appendChild(tr);
+        });
+
+        // Add event listeners for checkbox changes and persistence
+        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', (e) => {
+                const key = e.target.dataset.key;
+                const field = e.target.dataset.field;
+                const data = JSON.parse(localStorage.getItem(key)) || {};
+                data[field] = e.target.checked;
+                localStorage.setItem(key, JSON.stringify(data));
+                updateSummaryStats();
+            });
+        });
+
+        // Add event listeners for textarea auto-numbering and formatting
+        document.querySelectorAll('textarea').forEach(textarea => {
+            textarea.addEventListener('focus', (e) => autoFormatNumberedList(e.target));
+            textarea.addEventListener('keydown', handleEnterKey);
+            textarea.addEventListener('input', (e) => {
+                const key = e.target.dataset.key;
+                const field = e.target.dataset.field;
+                const data = JSON.parse(localStorage.getItem(key)) || {};
+                data[field] = e.target.value;
+                localStorage.setItem(key, JSON.stringify(data));
+            });
+        });
+
+        updateSummaryStats();
+    }
+
+    renderGrid();
+</script>
+</body>
+</html>
